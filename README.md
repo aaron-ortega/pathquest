@@ -1,7 +1,8 @@
 # pathquest
 
 Pathquest is a simple file system API using Python's [http.server](https://docs.python.org/3/library/http.server.html#module-http.server)
-library. 
+library.
+
 ## Compatibility
 Python 3.9 or greater is required to run the application. The code uses new type hinting features not found in earlier versions of Python.
 
@@ -48,7 +49,27 @@ The server can be initiated using a shell script or Docker. Both methods require
     docker run --rm -it -p 9000:9000 pathquest $PATH
     ```
 
-## Sources
-1. Json Schema
-    - Draft 2020-12 ([link](https://json-schema.org/draft/2020-12/json-schema-core.html))
-    - Regular expressions ([link](https://json-schema.org/understanding-json-schema/reference/regular_expressions.html))
+## Setup local Swagger
+Since `http.server` doesn't come with Swagger we will build a local version and point to our app.
+
+1. Follow the steps detailed [here](https://swagger.io/docs/open-source-tools/swagger-ui/development/setting-up/).
+2. Copy `swagger.yml` into swagger-ui
+    ```sh
+    cp swagger.yml ./swagger-ui/dev-helpers/swagger.yml
+    ```
+3. Navigate to `./swagger-ui/dev-helpers/` and replace
+
+    ```
+    url: "https://petstore.swagger.io/v2/swagger.json",
+    ```
+    with 
+    ```
+    url: "./swagger.yml",
+    ```
+
+Example:
+<img src="./img/swagger-example.png" alt="Alt text" title="Swagger example">
+
+## TODOs:
+- Add implementaion of remaining CRUD operations
+- Add more docs to `swagger.yml`
