@@ -22,6 +22,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     def write_header(self, code) -> None:
         self.protocol_version = "HTTP/1.1"
         self.send_response(code)
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Content-type", "application/json")
         self.end_headers()
 
