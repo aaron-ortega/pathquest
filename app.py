@@ -19,48 +19,82 @@ class RequestHandler(BaseHTTPRequestHandler):
     else:
         root = sys.argv[1]
 
-    def do_GET(self) -> None:
-        """Read files"""
-        status, message = get_contents(self.root, self.path)
-
+    def write_header(self, code) -> None:
         self.protocol_version = "HTTP/1.1"
-        self.send_response(status.value)
+        self.send_response(code)
         self.send_header("Content-type", "application/json")
         self.end_headers()
 
-        self.wfile.write(bytes(json.dumps(message, indent=2), "utf8"))
+    def write_response(self, response) -> None:
+        self.wfile.write(bytes(json.dumps(response, indent=2), "utf8"))
+
+    def action_not_implemented(self) -> None:
+        response = {
+            "status": {
+                "code": HTTPStatus.NOT_IMPLEMENTED.value,
+                "description": HTTPStatus.NOT_IMPLEMENTED.description,
+            }
+        }
+        self.write_header(response["status"]["code"])
+        self.write_response(response)
+
+    def do_GET(self) -> None:
+        """Read files"""
+        response = get_contents(self.root, self.path)
+
+        self.write_header(response["status"]["code"])
+        self.write_response(response)
 
     def do_DELETE(self) -> None:
         """Delete object or files"""
         # status, message = delete_contents(self.root, self.path)
-        ...
+        self.action_not_implemented()
 
     def do_POST(self) -> None:
         """Replace files"""
-        ...
+        self.action_not_implemented()
 
     def do_PUT(self) -> None:
         """Add files"""
-        ...
+        self.action_not_implemented()
 
 
 def delete_contents(root: str, stem: str) -> tuple[HTTPStatus, dict]:
-    """TODO: complete delete logic"""
+    """
+    TODO: In progress
+    Following cases need handling:
+        - If object is valid and exists, then delete and return 200
+        - If object doesn't exist, then do nothing and return 204
+        - If object is non-empty directory, then do nothing and return 400; no recursive deletion
+    """
     path = Path(root + stem).resolve()
 
     try:
         os.rmdir(path)
-        # return HTTPStatus.OK, response
     except FileNotFoundError:
-        return HTTPStatus.NOT_FOUND, f'Resource "{path}" not found!'
+        return {
+            "code": HTTPStatus.NOT_FOUND.value,
+            "description": HTTPStatus.NOT_FOUND.description,
+            "message": f'Resource "{path}" not found!',
+        }
     except OSError:
-        return HTTPStatus.BAD_REQUEST, "Can't deleted non-empty directory"
+        return {
+            "code": HTTPStatus.BAD_REQUEST.value,
+            "description": HTTPStatus.BAD_REQUEST.description,
+            "message": "Can't deleted non-empty directory",
+        }
 
-    response = json.dumps(
-        {"data": {"root": root, "name": str(path), "status": "DELETED"}},
-        indent=2,
-    )
-    return HTTPStatus.OK, response
+    return {
+        "data": {
+            "root": root,
+            "name": str(path),
+            "status": {
+                "code": HTTPStatus.OK.value,
+                "description": HTTPStatus.OK.description,
+                "message": f"Resource '{path}' deleted!",
+            },
+        }
+    }
 
 
 def get_contents(root: str, stem: str) -> tuple[HTTPStatus, str]:
@@ -72,11 +106,20 @@ def get_contents(root: str, stem: str) -> tuple[HTTPStatus, str]:
     elif path.is_file():
         items = [path]
     else:
-        return HTTPStatus.NOT_FOUND, f'Resource "{path}" not found!'
+        return {
+            "status": {
+                "code": HTTPStatus.NOT_FOUND.value,
+                "description": HTTPStatus.NOT_FOUND.description,
+                "message": f"Resource '{path}' not found!",
+            }
+        }
 
     metadata = get_metadata(items)
-    response = {"data": {"root": root, "name": str(path), "contents": metadata}}
-    return HTTPStatus.OK, response
+    response = {
+        "data": {"root": root, "name": str(path), "contents": metadata},
+        "status": {"code": HTTPStatus.OK.value, "message": HTTPStatus.OK.description},
+    }
+    return response
 
 
 def get_metadata(items: list[Path]) -> list[dict]:

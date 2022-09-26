@@ -64,11 +64,25 @@ class TestGetMethods(unittest.TestCase):
         self.assertListEqual(dir_and_file_response, expected_result)
 
     def test_get_contents(self) -> None:
-        invalid_file_obj, _ = get_contents("foo", "bar")
-        self.assertEquals(HTTPStatus.NOT_FOUND, invalid_file_obj)
+        invalid_file_response = get_contents("foo", "bar")
+        self.assertEquals(
+            HTTPStatus.NOT_FOUND.value, invalid_file_response["status"]["code"]
+        )
+        self.assertDictEqual(
+            invalid_file_response,
+            {
+                "status": {
+                    "code": 404,
+                    "description": "Nothing matches the given URI",
+                    "message": "Resource "
+                    "'/Users/aaronortega/open-source-projects/pathquest/foobar' "
+                    "not found!",
+                }
+            },
+        )
 
-        ok_status, response = get_contents(str(self.path) + "/", self.tmp_file.name)
-        self.assertEquals(HTTPStatus.OK, ok_status)
+        response = get_contents(str(self.path) + "/", self.tmp_file.name)
+        self.assertEquals(HTTPStatus.OK.value, response["status"]["code"])
         self.assertDictEqual(
             response,
             {
@@ -88,7 +102,11 @@ class TestGetMethods(unittest.TestCase):
                     ],
                     "name": "/Users/aaronortega/open-source-projects/pathquest/foo.txt",
                     "root": "/Users/aaronortega/open-source-projects/pathquest/",
-                }
+                },
+                "status": {
+                    "code": 200,
+                    "message": "Request fulfilled, document follows",
+                },
             },
         )
 
