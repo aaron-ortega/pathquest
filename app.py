@@ -28,11 +28,12 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.send_header("Content-type", "application/json")
         self.end_headers()
 
-        self.wfile.write(bytes(message, "utf8"))
+        self.wfile.write(bytes(json.dumps(message, indent=2), "utf8"))
 
     def do_DELETE(self) -> None:
         """Delete object or files"""
-        status, message = delete_contents(self.root, self.path)
+        # status, message = delete_contents(self.root, self.path)
+        ...
 
     def do_POST(self) -> None:
         """Replace files"""
@@ -43,12 +44,13 @@ class RequestHandler(BaseHTTPRequestHandler):
         ...
 
 
-def delete_contents(root: str, stem: str) -> tuple[HTTPStatus, str]:
+def delete_contents(root: str, stem: str) -> tuple[HTTPStatus, dict]:
+    """TODO: complete delete logic"""
     path = Path(root + stem).resolve()
 
     try:
         os.rmdir(path)
-        # return HTTPStatus.OK,
+        # return HTTPStatus.OK, response
     except FileNotFoundError:
         return HTTPStatus.NOT_FOUND, f'Resource "{path}" not found!'
     except OSError:
@@ -73,9 +75,7 @@ def get_contents(root: str, stem: str) -> tuple[HTTPStatus, str]:
         return HTTPStatus.NOT_FOUND, f'Resource "{path}" not found!'
 
     metadata = get_metadata(items)
-    response = json.dumps(
-        {"data": {"root": root, "name": str(path), "contents": metadata}}, indent=2
-    )
+    response = {"data": {"root": root, "name": str(path), "contents": metadata}}
     return HTTPStatus.OK, response
 
 
@@ -104,6 +104,7 @@ def main() -> None:
     server = HTTPServer((HOST, PORT), RequestHandler)
     # Register the path and the entities within it
     print("Server running...")
+    print(f"Listening to connections on port: {PORT}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
@@ -111,4 +112,5 @@ def main() -> None:
         print("\nServer stopped!")
 
 
-main()
+if __name__ == "__main__":
+    main()
