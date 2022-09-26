@@ -1,0 +1,155 @@
+openapi: 3.0.3
+info:
+  title: Swagger File System Info - OpenAPI 3.0
+  description: |-
+    The application is a small REST API to display file information from a portion of the user’s file system.
+    The user will specify a root directory when launching the application. All directories from the root on
+    downward are then browsable using the REST API.
+  version: 0.1.0
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+paths:
+  /:
+    get:
+      tags:
+        - file system
+      summary: Points to an user specified root directory at time of app initialization
+      parameters:
+        - name: tags
+          in: query
+          description: Tags to filter by
+          required: false
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pet"
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pet"
+        "400":
+          description: Invalid tag value
+components:
+  schemas:
+    Pet:
+      required:
+        - data
+        - status
+      type: object
+      properties:
+        data:
+          title: Data
+          type: object
+          required:
+            - contents
+            - name
+            - root
+          properties:
+            contents:
+              title: Contents
+              type: array
+              items:
+                title: Items
+                type: object
+                required:
+                  - name
+                  - owner
+                  - permission
+                  - size
+                  - type
+                properties:
+                  name:
+                    title: Name
+                    type: string
+                  owner:
+                    type: string
+                    examples:
+                      - root
+                  permission:
+                    type: object
+                    required:
+                      - execute
+                      - read
+                      - write
+                    properties:
+                      execute:
+                        type: boolean
+                        description: Indicates if user has execute access
+                      read:
+                        type: boolean
+                        description: Indicates if user has read access
+                      write:
+                        type: boolean
+                        description: Indicates if user has write access
+                  size:
+                    type: integer
+                    description: The size of object in bytes
+                  type:
+                    type: string
+                    examples:
+                      - file
+                      - directory
+            name:
+              title: Name
+              type: string
+              default: ""
+              examples:
+                - "/Users/aaronortega/open-source-projects/pathquest/foo.txt"
+            root:
+              title: Root
+              type: string
+              default: ""
+              examples:
+                - "/Users/aaronortega/open-source-projects/pathquest/"
+        status:
+          description: Provides status information of user request
+          type: object
+          required:
+            - code
+            - description
+            - message
+          properties:
+            code:
+              description: The numeric value of HTTP status code
+              type: integer
+              examples:
+                - 200
+            description:
+              type: string
+              description: "Python's description of status code: https://docs.python.org/3.9/library/http.html#http-status-codes"
+              examples:
+                - Request fulfilled, document follows
+            message:
+              description: Developer friendly message related to status
+              type: string
+      xml:
+        name: pet
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+  requestBodies:
+    Pet:
+      description: Pet object that needs to be added to the store
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Pet"
