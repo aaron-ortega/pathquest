@@ -1,0 +1,84 @@
+{
+    "$id": "https://example.com/product.schema.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "File System Display",
+    "description": "Display file information from a portion of the user's file system.",
+    "type": "object",
+    "required": [
+        "path"
+    ],
+    "patternProperties": {
+        "^(/[^/]+)+$": {}
+    },
+    "properties": {
+        "path": {
+            "description": "A unique file system path ",
+            "type": "#/$defs/file_or_directory_string"
+        }
+    },
+    "$defs": {
+        "file_or_directory_string": {
+            "oneOf": [
+                {
+                    "type": "string",
+                    "pattern": "\\{\\{.*\\}\\}\\.txt"
+                },
+                {
+                    "type": "string",
+                    "pattern": "\\{\\{.*\\}\\}"
+                }
+            ]
+        },
+        "file": {
+            "description": "File information from a portion of the user's file system.",
+            "type": "object",
+            "required": [
+                "name",
+                "owner",
+                "size",
+                "permissions"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Name of file"
+                },
+                "owner": {
+                    "type": "string",
+                    "description": "Owner of file"
+                },
+                "size": {
+                    "type": "string",
+                    "description": "The size of file in bytes"
+                },
+                "permissions": {
+                    "type": "string",
+                    "description": "#/$defs/file_permissions"
+                }
+            }
+        },
+        "file_permissions": {
+            "description": "Display file permissions",
+            "type": "object",
+            "required": [
+                "read",
+                "write",
+                "execute"
+            ],
+            "properties": {
+                "read": {
+                    "type": "boolean",
+                    "description": "Indicates if user has read access"
+                },
+                "write": {
+                    "type": "boolean",
+                    "description": "Indicates if user has write access"
+                },
+                "execute": {
+                    "type": "boolean",
+                    "description": "Indicates if user has execute access"
+                }
+            }
+        }
+    }
+}
