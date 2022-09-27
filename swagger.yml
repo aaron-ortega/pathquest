@@ -9,22 +9,14 @@ info:
 externalDocs:
   description: Find out more about Swagger
   url: http://swagger.io
+servers:
+  - url: http://localhost:9000/
 paths:
   /:
     get:
       tags:
         - file system
       summary: Points to an user specified root directory at time of app initialization
-      parameters:
-        - name: tags
-          in: query
-          description: Tags to filter by
-          required: false
-          explode: true
-          schema:
-            type: array
-            items:
-              type: string
       responses:
         "200":
           description: successful operation
@@ -73,10 +65,10 @@ components:
                   name:
                     title: Name
                     type: string
+                    example: "/home/aaron/Desktop"
                   owner:
                     type: string
-                    examples:
-                      - root
+                    example: "root"
                   permission:
                     type: object
                     required:
@@ -96,23 +88,18 @@ components:
                   size:
                     type: integer
                     description: The size of object in bytes
+                    example: 42
                   type:
                     type: string
-                    examples:
-                      - file
-                      - directory
+                    example: file
             name:
               title: Name
               type: string
-              default: ""
-              examples:
-                - "/Users/aaronortega/open-source-projects/pathquest/foo.txt"
+              example: "/home/aaron/Desktop/foo.txt"
             root:
               title: Root
               type: string
-              default: ""
-              examples:
-                - "/Users/aaronortega/open-source-projects/pathquest/"
+              example: "/home/aaron/Desktop/"
         status:
           description: Provides status information of user request
           type: object
@@ -124,13 +111,11 @@ components:
             code:
               description: The numeric value of HTTP status code
               type: integer
-              examples:
-                - 200
+              example: 200
             description:
               type: string
               description: "Python's description of status code: https://docs.python.org/3.9/library/http.html#http-status-codes"
-              examples:
-                - Request fulfilled, document follows
+              examples: Request fulfilled, document follows
             message:
               description: Developer friendly message related to status
               type: string
